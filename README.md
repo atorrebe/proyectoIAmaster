@@ -13,3 +13,11 @@ Desarrollar un sistema capaz de analizar textos y detectar el sentimiento expres
 
 ## Organización inicial
 El repositorio se ha preparado como base de trabajo para las siguientes fases del proyecto, donde se irán añadiendo los datos, el código y la documentación necesaria.
+
+## Estructura del proyecto
+
+- data/raw: datos originales sin modificar
+- data/processed: datos limpios y preparados
+- docs: documentación del proyecto
+- notebooks: pruebas y análisis con Jupyter
+- src: código principal
