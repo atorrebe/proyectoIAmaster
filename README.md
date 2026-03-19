@@ -2,11 +2,15 @@
 
 > Proyecto de análisis de sentimiento mediante IA y Big Data
 
+---
+
 ## Descripción del proyecto
 
 Este proyecto tiene como objetivo desarrollar un sistema capaz de analizar textos y detectar automáticamente el sentimiento expresado en ellos (positivo, negativo o neutro). Se combinarán técnicas de **Big Data** para el procesamiento de grandes volúmenes de datos con modelos de **Inteligencia Artificial** para la clasificación de sentimientos.
 
 El sistema se aplicará sobre datasets de comentarios y opiniones reales, permitiendo obtener insights a escala sobre la percepción de usuarios en distintos contextos (reseñas, redes sociales, foros, etc.).
+
+---
 
 ## Integrantes
 
