@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SentimentAI — Análisis de Sentimiento</title>
+<style>
+/* ■■ Reset y variables ■■ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+--bg:	#0f1117;
+--surface: #1a1d2e;
+--border:	#2e3150;
+--accent:	#4f8ef7;
+--pos:	#34d399;
+--neg:	#f87171;
+--neu:	#fbbf24;
+--text:	#e2e8f0;
+--muted:	#94a3b8;
+--radius:	12px;
+}
+body {
+background: var(--bg); color: var(--text);
+font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh;
+display: flex;
+flex-direction: column; align-items: center; padding: 2rem 1rem;
+}
+
+/* ■■ Header ■■ */ header {
+text-align: center; margin-bottom: 2.5rem;
+}
+header h1 { font-size: 2rem; font-weight: 700; color: var(--accent); } header p { color: var(--muted); margin-top: .4rem; font-size: .95rem; }
+
+/* ■■ Card principal ■■ */
+.card {
+background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem;
+width: 100%;
+max-width: 680px;
+}
+
+label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .5rem; }
+
+textarea { width: 100%; height: 140px;
+background: var(--bg);
+border: 1px solid var(--border); border-radius: 8px;
+color: var(--text); font-size: 1rem; padding: .8rem 1rem; resize: vertical; outline: none;
+transition: border-color .2s;
+}
+textarea:focus { border-color: var(--accent); }
+
+.char-count { font-size: .75rem; color: var(--muted); text-align: right; margin-top: .3rem; }
+
+/* ■■ Botón ■■ */ button#analyzeBtn {
+margin-top: 1.2rem; width: 100%; padding: .85rem;
+background: var(--accent); color: #fff;
+border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;
+transition: opacity .2s;
+}
+button#analyzeBtn:disabled { opacity: .5; cursor: not-allowed; } button#analyzeBtn:not(:disabled):hover { opacity: .85; }
+
+/* ■■ Resultado ■■ */ #result {
+margin-top: 1.5rem; display: none;
+}
+.result-box {
+border-radius: 10px; padding: 1.2rem 1.5rem; display: flex;
+align-items: center; gap: 1rem;
+}
+.result-box.positivo { background: rgba(52,211,153,.12); border: 1px solid var(--pos); }
+.result-box.negativo { background: rgba(248,113,113,.12); border: 1px solid var(--neg); }
+.result-box.neutro	{ background: rgba(251,191,36,.12); border: 1px solid var(--neu); }
+
+.emoji { font-size: 2.2rem; }
+.result-label { font-size: 1.3rem; font-weight: 700; text-transform: capitalize; }
+.result-conf { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
+
+/* ■■ Barra de confianza ■■ */
+.confidence-bar { margin-top: .8rem; height: 6px;
+background: var(--border); border-radius: 99px; overflow: hidden;
+}
+
+.confidence-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+.positivo .confidence-fill { background: var(--pos); }
+.negativo .confidence-fill { background: var(--neg); }
+.neutro	.confidence-fill { background: var(--neu); }
+
+/* ■■ Error ■■ */ #error {
+margin-top: 1rem; padding: .8rem 1rem;
+background: rgba(248,113,113,.1); border: 1px solid var(--neg); border-radius: 8px;
+color: var(--neg); font-size: .9rem; display: none;
+}
+
+/* ■■ Loader ■■ */
+.loader {
+display: inline-block; width: 18px; height: 18px;
+border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+border-radius: 50%;
+animation: spin .7s linear infinite; vertical-align: middle;
+margin-right: .4rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ■■ Footer ■■ */
+footer { margin-top: 3rem; color: var(--muted); font-size: .8rem; text-align: center; } footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>■ SentimentAI</h1>
+<p>Análisis de sentimiento en español · Proyecto IA & Big Data</p>
+</header>
+
+<div class="card">
+<label for="textInput">Introduce tu reseña o comentario en español</label>
+<textarea id="textInput" placeholder="Ej: El producto llegó antes de lo esperado y funciona perfectamente.
+<div class="char-count"><span id="charCount">0</span> / 5000</div>
+
+<button id="analyzeBtn" onclick="analyze()">Analizar sentimiento</button>
+
+<div id="error"></div>
+
+<div id="result">
+<div class="result-box" id="resultBox">
+<span class="emoji" id="resultEmoji"></span>
+<div>
+<div class="result-label" id="resultLabel"></div>
+<div class="result-conf" id="resultConf"></div>
+</div>
+</div>
+<div class="confidence-bar">
+<div class="confidence-fill" id="confFill" style="width:0%"></div>
+</div>
+
+</div>
+</div>
+
+<footer>
+Proyecto académico ·
+<a href="https://github.com/atorrebe/proyectoIAmaster" target="_blank">GitHub</a>
+· API en <code>http://localhost:8000</code>
+</footer>
+
+<script>
+const API_BASE = "http://localhost:8000/api/v1";
+const EMOJI = { positivo: "■", neutro: "■", negativo: "■" };
+
+// Contador de caracteres document.getElementById("textInput").addEventListener("input", function () {
+document.getElementById("charCount").textContent = this.value.length;
+});
+
+async function analyze() {
+const text = document.getElementById("textInput").value.trim(); const btn = document.getElementById("analyzeBtn");
+const errDiv = document.getElementById("error"); const resDiv = document.getElementById("result");
+
+// Reset
+errDiv.style.display = "none"; resDiv.style.display = "none";
+
+if (text.length < 3) {
+showError("El texto debe tener al menos 3 caracteres."); return;
+}
+
+// Estado cargando btn.disabled = true;
+btn.innerHTML = '<span class="loader"></span>Analizando...';
+
+try {
+const response = await fetch(`${API_BASE}/predict`, { method: "POST",
+headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }),
+});
+
+if (!response.ok) {
+const err = await response.json();
+throw new Error(err.detail || `Error ${response.status}`);
+}
+
+const data = await response.json(); showResult(data);
+
+} catch (e) {
+if (e.message.includes("Failed to fetch")) {
+showError("No se puede conectar con la API. ¿Está levantado el backend? (uvicorn src.api.main:app --
+} else { showError(e.message);
+}
+} finally { btn.disabled = false;
+btn.innerHTML = "Analizar sentimiento";
+}
+
+}
+
+function showResult(data) {
+const box	= document.getElementById("resultBox"); const label = document.getElementById("resultLabel"); const conf = document.getElementById("resultConf"); const emoji = document.getElementById("resultEmoji"); const fill = document.getElementById("confFill"); const res	= document.getElementById("result");
+
+box.className = `result-box ${data.sentiment}`; emoji.textContent = EMOJI[data.sentiment] || "■"; label.textContent = data.sentiment;
+conf.textContent = `Confianza: ${(data.confidence * 100).toFixed(1)}%`;
+
+setTimeout(() => {
+fill.style.width = `${(data.confidence * 100).toFixed(1)}%`;
+}, 50);
+
+res.style.display = "block";
+}
+
+function showError(msg) {
+const e = document.getElementById("error"); e.textContent = "■■ " + msg; e.style.display = "block";
+}
+</script>
+
+</body>
+</html>
