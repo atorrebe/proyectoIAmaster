@@ -1,127 +1,114 @@
 # proyectoIAmaster
 
-> Proyecto de análisis de sentimiento mediante IA y Big Data
+Proyecto final de analisis de sentimiento en espanol para el Curso de Especializacion en Inteligencia Artificial y Big Data.
 
----
+## Resumen
 
-## Descripción del proyecto
+La aplicacion analiza resenas en espanol a partir de un modelo `Logistic Regression + TF-IDF`, expone una API REST con FastAPI y ofrece una interfaz web integrada para:
 
-Este proyecto tiene como objetivo desarrollar un sistema capaz de analizar textos y detectar automáticamente el sentimiento expresado en ellos (positivo, negativo o neutro). Se combinarán técnicas de **Big Data** para el procesamiento de grandes volúmenes de datos con modelos de **Inteligencia Artificial** para la clasificación de sentimientos.
+- lanzar predicciones
+- consultar metricas del modelo
+- guardar historial en SQLite
+- exportar resultados a CSV
 
-El sistema se aplicará sobre datasets de comentarios y opiniones reales, permitiendo obtener insights a escala sobre la percepción de usuarios en distintos contextos (reseñas, redes sociales, foros, etc.).
+Esta version corresponde al cierre de Fase 3 y prioriza una ejecucion local sencilla, trazabilidad de predicciones y documentacion final coherente con el codigo.
 
----
+## Mejoras de Fase 3
 
-## Integrantes
+- Arranque con un solo comando usando `python src/main.py`
+- Frontend servido por la propia API para evitar problemas de `file://`
+- Persistencia local de predicciones en `SQLite`
+- Exportacion del historial a `CSV`
+- Dashboard ligero con metricas, matriz de confusion e historial reciente
+- Validaciones y gestion de errores mas claras
+- Seguridad basica con `TrustedHostMiddleware`, `CORS` restringido y cabeceras defensivas
+- Tests de API para `health`, `predict`, `metrics` y `export`
+- Dockerfile y `docker-compose.yml` corregidos
 
-| Nombre                   |
-| ------------------------ |
-| Andrés Torres Berraquero |
-| Angel Alegre I Mena      |
-| Edgar Sarria Serrano     |
-| Rodrigo Serrano Jiménez  |
+## Arquitectura final
 
----
-
-## Arquitectura resumida
-
+```text
+Dataset -> Pipeline (ingest / preprocess / train)
+       -> Artifacts del modelo (.joblib + metrics.json)
+       -> API FastAPI
+       -> Frontend web servido por la API
+       -> SQLite (historial de predicciones)
+       -> Export CSV
 ```
-┌─────────────────┐     ┌──────────────────┐      ┌───────────────────┐
-│   Fuente de     │────▶│  Procesamiento   │────▶│    Modelo de IA   │
-│     datos       │     │   (Big Data)     │      │  (Sentimiento)    │
-│  (dataset raw)  │     │  Spark / Pandas  │      │  Hugging Face /   │
-└─────────────────┘     └──────────────────┘      │  Transformers     │
-                                                  └────────┬──────────┘
-                                                           │
-                                                  ┌────────▼──────────┐
-                                                  │    Resultados     │
-                                                  │  y visualización  │
-                                                  └───────────────────┘
-```
-
-**Fases del pipeline:**
-
-1. **Ingesta** — Carga del dataset de comentarios/opiniones desde `data/raw/`
-2. **Preprocesado** — Limpieza, tokenización y normalización del texto
-3. **Modelado** — Entrenamiento o fine-tuning de un modelo de análisis de sentimiento
-4. **Evaluación** — Métricas de precisión, recall y F1-score
-5. **Visualización** — Exploración de resultados en notebooks Jupyter
-
----
-
-## Cómo ejecutar
-
-> ⚠️ _El proyecto está en fase inicial. Las instrucciones se irán completando en próximas fases._
-
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/usuario/proyectoIAmaster.git
-cd proyectoIAmaster
-```
-
-### 2. Crear entorno virtual e instalar dependencias
-
-```bash
-python -m venv venv
-source venv/bin/activate      # En Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 3. Ejecutar el pipeline (próximamente)
-
-```bash
-# Preprocesado
-python src/preprocess.py
-
-# Entrenamiento
-python src/train.py
-
-# Evaluación
-python src/evaluate.py
-```
-
-### 4. Explorar los notebooks
-
-```bash
-jupyter notebook notebooks/
-```
-
----
-
-## Tecnologías
-
-| Categoría              | Tecnología                |
-| ---------------------- | ------------------------- |
-| Lenguaje principal     | Python 3.10+              |
-| Big Data               | Apache Spark / PySpark    |
-| NLP y modelos          | Hugging Face Transformers |
-| Análisis y exploración | Jupyter Notebook, Pandas  |
-| Visualización          | Matplotlib, Seaborn       |
-| Control de versiones   | Git / GitHub              |
-
----
-
-## Estado actual
-
-- [x] Definición de la idea y objetivos del proyecto
-- [x] Organización del repositorio
-- [ ] Selección definitiva del dataset
-- [ ] Preprocesado de datos
-- [ ] Entrenamiento del modelo
-- [ ] Evaluación y resultados
-
----
 
 ## Estructura del proyecto
 
-```
+```text
 proyectoIAmaster/
-├── data/
-│   ├── raw/          # Datos originales sin modificar
-│   └── processed/    # Datos limpios y preparados
-├── docs/             # Documentación del proyecto
-├── notebooks/        # Pruebas y análisis con Jupyter
-├── src/              # Código principal
-└── README.md
+|-- data/
+|-- docs/
+|-- environment/
+|-- models/
+|-- src/
+|   |-- api/
+|   |-- core/
+|   |-- frontend/
+|   |-- pipeline/
+|   `-- services/
+|-- tests/
+|-- pytest.ini
+`-- README.md
 ```
+
+## Requisitos
+
+- Python 3.10 o superior
+- `pip`
+- Modelos entrenados dentro de `models/`
+
+## Ejecucion local
+
+### 1. Crear entorno e instalar dependencias
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+pip install -r environment/requirements.txt
+```
+
+### 2. Arrancar la aplicacion
+
+```bash
+python src/main.py
+```
+
+### 3. Abrir la interfaz
+
+Visita [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+### 4. Endpoints principales
+
+- `GET /api/v1/health`
+- `POST /api/v1/predict`
+- `GET /api/v1/metrics`
+- `GET /api/v1/history`
+- `GET /api/v1/export`
+
+## Automatizacion
+
+- Ejecucion local: `python src/main.py`
+- Contenedores: `docker compose -f environment/docker-compose.yml up --build`
+
+## Tests
+
+```bash
+pytest
+```
+
+## Limitaciones actuales
+
+- No se ha desplegado en cloud para evitar coste y complejidad extra en un entorno academico local.
+- El modelo final sigue siendo clasico; la comparativa con transformers se mantiene como mejora futura.
+- No se ha automatizado retraining ni monitorizacion avanzada de MLOps.
+- La base de datos SQLite esta pensada para demo local, no para concurrencia alta.
+
+## Documentacion adicional
+
+- [Guia de usuario](docs/guia_usuario.md)
+- [Guia tecnica](docs/guia_tecnica.md)
+- [Guia de despliegue](docs/guia_despliegue.md)

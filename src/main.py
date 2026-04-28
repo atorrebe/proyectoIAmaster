@@ -1,9 +1,11 @@
-from preprocesado import procesar_datos
+from __future__ import annotations
 
-def main():
-print("Iniciando procesamiento...")
+import uvicorn
 
-procesar_datos()
+
+def main() -> None:
+    uvicorn.run("src.api.main:app", host="127.0.0.1", port=8000, reload=False)
+
 
 if __name__ == "__main__":
-main()
+    main()
