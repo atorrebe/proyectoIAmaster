@@ -1,0 +1,26 @@
+{
+  "accuracy": 0.6807,
+  "f1_weighted": 0.6912,
+  "confusion_matrix": [
+    [
+      11518,
+      3524,
+      943
+    ],
+    [
+      2174,
+      3840,
+      1979
+    ],
+    [
+      1062,
+      3080,
+      11849
+    ]
+  ],
+  "labels": [
+    "negativo",
+    "neutro",
+    "positivo"
+  ]
+}
