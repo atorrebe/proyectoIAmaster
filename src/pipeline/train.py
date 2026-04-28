@@ -5,6 +5,8 @@ train.py - Entrenamiento del modelo de analisis de sentimiento.
 from __future__ import annotations
 
 import json
+import sys
+from pathlib import Path
 
 import joblib
 import pandas as pd
@@ -12,6 +14,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+project_root_str = str(PROJECT_ROOT)
+if project_root_str not in sys.path:
+    sys.path.insert(0, project_root_str)
 
 from src.core.config import DATA_DIR, METRICS_PATH, MODEL_PATH, MODELS_DIR, VECTORIZER_PATH
 
