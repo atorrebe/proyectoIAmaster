@@ -3,237 +3,737 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SentimentAI — Análisis de Sentimiento</title>
+  <title>SentimentAI | Analisis de sentimiento</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:      #0f1117;
-      --surface: #1a1d2e;
-      --border:  #2e3150;
-      --accent:  #4f8ef7;
-      --pos:     #34d399;
-      --neg:     #f87171;
-      --neu:     #fbbf24;
-      --text:    #e2e8f0;
-      --muted:   #94a3b8;
-      --radius:  12px;
+      --bg: #f3efe6;
+      --surface: rgba(255, 250, 240, 0.9);
+      --surface-strong: #fffdf8;
+      --ink: #1f2933;
+      --muted: #5f6c7b;
+      --line: rgba(31, 41, 51, 0.12);
+      --accent: #0f766e;
+      --accent-soft: #d8f3ee;
+      --pos: #1f9d55;
+      --neg: #d9485f;
+      --neu: #d4a72c;
+      --shadow: 0 24px 80px rgba(29, 41, 57, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
     }
+
+    * { box-sizing: border-box; }
+
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      margin: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 32%),
+        radial-gradient(circle at top right, rgba(212, 167, 44, 0.14), transparent 28%),
+        linear-gradient(180deg, #f8f4ea 0%, #f3efe6 42%, #ede6d8 100%);
     }
-    header { text-align: center; margin-bottom: 2.5rem; }
-    header h1 { font-size: 2rem; font-weight: 700; color: var(--accent); }
-    header p  { color: var(--muted); margin-top: .4rem; font-size: .95rem; }
-    .card {
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 32px auto 48px;
+    }
+
+    .hero,
+    .panel {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      width: 100%;
-      max-width: 680px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
     }
-    label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .5rem; }
+
+    .hero {
+      padding: 36px;
+      display: grid;
+      gap: 28px;
+      grid-template-columns: 1.25fr 0.9fr;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3 { margin: 0; font-weight: 700; }
+
+    h1 {
+      margin-top: 18px;
+      font-size: clamp(2.3rem, 5vw, 4.3rem);
+      line-height: 0.98;
+    }
+
+    .hero p {
+      max-width: 56ch;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .hero-stats {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .mini-card {
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+    }
+
+    .mini-label {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .mini-value {
+      margin-top: 8px;
+      font-size: 2rem;
+    }
+
+    .layout {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+    }
+
+    .panel {
+      padding: 28px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-header p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.98rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
     textarea {
       width: 100%;
-      height: 140px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 1rem;
-      padding: .8rem 1rem;
+      min-height: 220px;
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+      background: var(--surface-strong);
+      color: var(--ink);
+      font: inherit;
+      line-height: 1.7;
       resize: vertical;
-      outline: none;
-      transition: border-color .2s;
     }
-    textarea:focus { border-color: var(--accent); }
-    .char-count { font-size: .75rem; color: var(--muted); text-align: right; margin-top: .3rem; }
-    button#analyzeBtn {
-      margin-top: 1.2rem;
-      width: 100%;
-      padding: .85rem;
+
+    textarea:focus {
+      outline: 2px solid rgba(15, 118, 110, 0.18);
+      border-color: rgba(15, 118, 110, 0.45);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .char-count,
+    .status-line {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .status-live::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.16);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button,
+    .ghost-link {
+      border: none;
+      border-radius: 999px;
+      padding: 13px 22px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      text-decoration: none;
+    }
+
+    button {
       background: var(--accent);
       color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity .2s;
+      box-shadow: 0 16px 30px rgba(15, 118, 110, 0.24);
     }
-    button#analyzeBtn:disabled { opacity: .5; cursor: not-allowed; }
-    button#analyzeBtn:not(:disabled):hover { opacity: .85; }
-    #result { margin-top: 1.5rem; display: none; }
-    .result-box {
-      border-radius: 10px;
-      padding: 1.2rem 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
+
+    .ghost-link {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid rgba(15, 118, 110, 0.22);
     }
-    .result-box.positivo { background: rgba(52,211,153,.12); border: 1px solid var(--pos); }
-    .result-box.negativo { background: rgba(248,113,113,.12); border: 1px solid var(--neg); }
-    .result-box.neutro   { background: rgba(251,191,36,.12);  border: 1px solid var(--neu); }
-    .emoji { font-size: 2.2rem; }
-    .result-label { font-size: 1.3rem; font-weight: 700; text-transform: capitalize; }
-    .result-conf  { font-size: .85rem; color: var(--muted); margin-top: .2rem; }
-    .confidence-bar {
-      margin-top: .8rem;
-      height: 6px;
-      background: var(--border);
-      border-radius: 99px;
-      overflow: hidden;
+
+    button:hover,
+    .ghost-link:hover {
+      transform: translateY(-1px);
     }
-    .confidence-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
-    .positivo .confidence-fill { background: var(--pos); }
-    .negativo .confidence-fill { background: var(--neg); }
-    .neutro   .confidence-fill { background: var(--neu); }
-    #error {
-      margin-top: 1rem;
-      padding: .8rem 1rem;
-      background: rgba(248,113,113,.1);
-      border: 1px solid var(--neg);
-      border-radius: 8px;
-      color: var(--neg);
-      font-size: .9rem;
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .feedback {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: var(--radius-lg);
       display: none;
     }
-    .loader {
-      display: inline-block;
-      width: 18px; height: 18px;
-      border: 2px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: middle;
-      margin-right: .4rem;
+
+    .feedback.error {
+      display: block;
+      background: rgba(217, 72, 95, 0.08);
+      border: 1px solid rgba(217, 72, 95, 0.2);
+      color: #8c2339;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    footer { margin-top: 3rem; color: var(--muted); font-size: .8rem; text-align: center; }
-    footer a { color: var(--accent); text-decoration: none; }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      padding: 22px;
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .badge.positivo { background: rgba(31, 157, 85, 0.12); color: var(--pos); }
+    .badge.negativo { background: rgba(217, 72, 95, 0.12); color: var(--neg); }
+    .badge.neutro { background: rgba(212, 167, 44, 0.16); color: #8b6a12; }
+
+    .confidence-track {
+      width: 100%;
+      height: 10px;
+      margin-top: 16px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(31, 41, 51, 0.08);
+    }
+
+    .confidence-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 999px;
+      transition: width 0.45s ease;
+      background: linear-gradient(90deg, var(--accent), #3aa39b);
+    }
+
+    .metrics-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric-card {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+    }
+
+    .metric-card h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .metric-card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 1.8rem;
+    }
+
+    .matrix {
+      margin-top: 18px;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      text-align: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      background: rgba(15, 118, 110, 0.08);
+      color: var(--accent);
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td:first-child,
+    th:first-child {
+      text-align: left;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .history-item {
+      padding: 16px 18px;
+      border-radius: var(--radius-lg);
+      background: var(--surface-strong);
+      border: 1px solid var(--line);
+    }
+
+    .history-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .history-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.96rem;
+    }
+
+    .history-meta {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    @media (max-width: 940px) {
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 20px, 100%);
+        margin-top: 20px;
+      }
+
+      .hero,
+      .panel {
+        padding: 22px;
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-top,
+      .panel-header,
+      .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
   </style>
 </head>
 <body>
-
-<header>
-  <h1>🧠 SentimentAI</h1>
-  <p>Análisis de sentimiento en español · Proyecto IA y Big Data</p>
-</header>
-
-<div class="card">
-  <label for="textInput">Introduce tu reseña o comentario en español</label>
-  <textarea id="textInput" placeholder="Ej: El producto llegó antes de lo esperado y funciona perfectamente..."></textarea>
-  <div class="char-count"><span id="charCount">0</span> / 5000</div>
-
-  <button id="analyzeBtn" onclick="analyze()">Analizar sentimiento</button>
-
-  <div id="error"></div>
-
-  <div id="result">
-    <div class="result-box" id="resultBox">
-      <span class="emoji" id="resultEmoji"></span>
+  <main class="shell">
+    <section class="hero">
       <div>
-        <div class="result-label" id="resultLabel"></div>
-        <div class="result-conf" id="resultConf"></div>
+        <span class="eyebrow">Proyecto final IA y Big Data</span>
+        <h1>Analisis de sentimiento con API, dashboard y trazabilidad local.</h1>
+        <p>
+          Esta version final unifica frontend y backend en una sola aplicacion, registra
+          predicciones en SQLite y permite revisar metricas y actividad reciente sin salir
+          de la interfaz.
+        </p>
       </div>
-    </div>
-    <div class="confidence-bar">
-      <div class="confidence-fill" id="confFill" style="width:0%"></div>
-    </div>
-  </div>
-</div>
 
-<footer>
-  Proyecto académico ·
-  <a href="https://github.com/atorrebe/proyectoIAmaster" target="_blank">GitHub</a>
-  · API en <code>http://127.0.0.1:8000</code>
-</footer>
+      <div class="hero-stats">
+        <article class="mini-card">
+          <div class="mini-label">Estado del sistema</div>
+          <div class="mini-value" id="healthValue">Cargando...</div>
+        </article>
+        <article class="mini-card">
+          <div class="mini-label">Modelo en produccion</div>
+          <div class="mini-value">Logistic Regression + TF-IDF</div>
+        </article>
+        <article class="mini-card">
+          <div class="mini-label">Entrega Fase 3</div>
+          <div class="mini-value">UI + automatizacion + docs + tests</div>
+        </article>
+      </div>
+    </section>
 
-<script>
-  const API_BASE = "http://127.0.0.1:8000/api/v1";
-  const EMOJI = { positivo: "😊", neutro: "😐", negativo: "😞" };
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Analizador en vivo</h2>
+            <p>
+              Escribe una resena o comentario en espanol. El modelo devolvera la clase
+              prevista y su nivel de confianza.
+            </p>
+          </div>
+          <div class="status-line status-live" id="statusLine">Conectando con la API...</div>
+        </div>
 
-  document.getElementById("textInput").addEventListener("input", function () {
-    document.getElementById("charCount").textContent = this.value.length;
-  });
+        <label for="textInput">Texto a analizar</label>
+        <textarea
+          id="textInput"
+          placeholder="Ejemplo: El producto llego rapido, venia bien empaquetado y funciona mejor de lo esperado."
+        ></textarea>
 
-  async function analyze() {
-    const text = document.getElementById("textInput").value.trim();
-    const btn  = document.getElementById("analyzeBtn");
-    const errDiv = document.getElementById("error");
-    const resDiv = document.getElementById("result");
+        <div class="toolbar">
+          <div class="char-count"><span id="charCount">0</span> / 5000 caracteres</div>
+          <div class="char-count">Version de API: <span id="versionValue">-</span></div>
+        </div>
 
-    errDiv.style.display = "none";
-    resDiv.style.display = "none";
+        <div class="actions">
+          <button id="analyzeBtn" type="button">Analizar sentimiento</button>
+          <a class="ghost-link" href="/api/v1/export" target="_blank" rel="noreferrer">Exportar historial CSV</a>
+        </div>
 
-    if (text.length < 3) {
-      showError("El texto debe tener al menos 3 caracteres.");
-      return;
+        <div id="errorBox" class="feedback" role="alert"></div>
+
+        <section id="resultBox" class="result" aria-live="polite">
+          <div class="result-top">
+            <div>
+              <h3>Resultado mas reciente</h3>
+              <p id="resultSummary" class="status-line">Esperando una prediccion.</p>
+            </div>
+            <span class="badge" id="resultBadge">-</span>
+          </div>
+          <div class="confidence-track">
+            <div class="confidence-fill" id="confidenceFill"></div>
+          </div>
+        </section>
+      </article>
+
+      <aside class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Metricas del modelo</h2>
+            <p>
+              Resumen de evaluacion cargado desde <code>models/metrics.json</code> y
+              seguimiento de predicciones almacenadas durante la sesion local.
+            </p>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <h3>Accuracy</h3>
+            <strong id="accuracyValue">-</strong>
+          </div>
+          <div class="metric-card">
+            <h3>F1 ponderado</h3>
+            <strong id="f1Value">-</strong>
+          </div>
+          <div class="metric-card">
+            <h3>Predicciones guardadas</h3>
+            <strong id="trackedValue">0</strong>
+          </div>
+          <div class="metric-card">
+            <h3>Labels</h3>
+            <strong id="labelsValue">-</strong>
+          </div>
+        </div>
+
+        <div class="matrix">
+          <table>
+            <thead>
+              <tr>
+                <th>Real \ Pred.</th>
+                <th id="headCol1">-</th>
+                <th id="headCol2">-</th>
+                <th id="headCol3">-</th>
+              </tr>
+            </thead>
+            <tbody id="matrixBody">
+              <tr><td colspan="4">Cargando matriz de confusion...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel" style="margin-top: 24px;">
+      <div class="panel-header">
+        <div>
+          <h2>Historial reciente</h2>
+          <p>
+            Cada prediccion se registra en SQLite. Esto ayuda a demostrar persistencia,
+            trazabilidad y exportacion de resultados en la Fase 3.
+          </p>
+        </div>
+      </div>
+      <div id="historyList" class="history-list">
+        <p class="empty">Todavia no hay predicciones guardadas.</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "/api/v1";
+
+    const textInput = document.getElementById("textInput");
+    const charCount = document.getElementById("charCount");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const errorBox = document.getElementById("errorBox");
+    const resultBox = document.getElementById("resultBox");
+    const resultSummary = document.getElementById("resultSummary");
+    const resultBadge = document.getElementById("resultBadge");
+    const confidenceFill = document.getElementById("confidenceFill");
+    const historyList = document.getElementById("historyList");
+    const statusLine = document.getElementById("statusLine");
+    const healthValue = document.getElementById("healthValue");
+    const versionValue = document.getElementById("versionValue");
+
+    textInput.addEventListener("input", () => {
+      charCount.textContent = textInput.value.length;
+    });
+
+    analyzeBtn.addEventListener("click", analyzeSentiment);
+
+    async function requestJson(path, options) {
+      const response = await fetch(path, options);
+      if (!response.ok) {
+        let message = `Error ${response.status}`;
+        try {
+          const payload = await response.json();
+          message = payload.detail || message;
+        } catch (error) {
+          message = response.statusText || message;
+        }
+        throw new Error(message);
+      }
+      return response.json();
     }
 
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span>Analizando...';
+    async function hydrateDashboard() {
+      try {
+        const [health, metrics, history] = await Promise.all([
+          requestJson(`${API_BASE}/health`),
+          requestJson(`${API_BASE}/metrics`),
+          requestJson(`${API_BASE}/history?limit=5`),
+        ]);
 
-    try {
-      const response = await fetch(`${API_BASE}/predict`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        paintHealth(health);
+        paintMetrics(metrics);
+        paintHistory(history.items);
+      } catch (error) {
+        showError(error.message);
+        statusLine.textContent = "No se pudo cargar el dashboard inicial.";
+        healthValue.textContent = "Sin conexion";
+      }
+    }
+
+    function paintHealth(health) {
+      const ready = health.status === "ok" && health.artifacts_loaded;
+      healthValue.textContent = ready ? "Listo" : "Parcial";
+      versionValue.textContent = health.version;
+      statusLine.textContent = ready
+        ? "API activa y modelo cargado."
+        : "API activa pero con dependencias pendientes.";
+    }
+
+    function paintMetrics(metrics) {
+      document.getElementById("accuracyValue").textContent = formatMetric(metrics.accuracy);
+      document.getElementById("f1Value").textContent = formatMetric(metrics.f1_weighted);
+      document.getElementById("trackedValue").textContent = metrics.tracked_predictions;
+      document.getElementById("labelsValue").textContent = metrics.labels.join(" / ");
+
+      metrics.labels.forEach((label, index) => {
+        const head = document.getElementById(`headCol${index + 1}`);
+        if (head) {
+          head.textContent = label;
+        }
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.detail || `Error ${response.status}`);
-      }
-
-      const data = await response.json();
-      showResult(data);
-
-    } catch (e) {
-      if (e.message.includes("Failed to fetch")) {
-        showError("No se puede conectar con la API. Asegurate de tener uvicorn corriendo.");
-      } else {
-        showError(e.message);
-      }
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = "Analizar sentimiento";
+      const body = document.getElementById("matrixBody");
+      body.innerHTML = metrics.confusion_matrix
+        .map((row, index) => {
+          const cells = row.map((value) => `<td>${value}</td>`).join("");
+          return `<tr><td>${metrics.labels[index] || "fila"}</td>${cells}</tr>`;
+        })
+        .join("");
     }
-  }
 
-  function showResult(data) {
-    const box   = document.getElementById("resultBox");
-    const label = document.getElementById("resultLabel");
-    const conf  = document.getElementById("resultConf");
-    const emoji = document.getElementById("resultEmoji");
-    const fill  = document.getElementById("confFill");
-    const res   = document.getElementById("result");
+    function paintHistory(items) {
+      if (!items.length) {
+        historyList.innerHTML = '<p class="empty">Todavia no hay predicciones guardadas.</p>';
+        return;
+      }
 
-    box.className = `result-box ${data.sentiment}`;
-    emoji.textContent = EMOJI[data.sentiment] || "🤔";
-    label.textContent = data.sentiment;
-    conf.textContent  = `Confianza: ${(data.confidence * 100).toFixed(1)}%`;
+      historyList.innerHTML = items
+        .map((item) => `
+          <article class="history-item">
+            <div class="history-top">
+              <strong>#${item.id}</strong>
+              <span class="badge ${item.sentiment}">${item.sentiment}</span>
+            </div>
+            <p>${escapeHtml(item.text)}</p>
+            <div class="history-meta">
+              Confianza: ${(item.confidence * 100).toFixed(1)}% | ${item.created_at}
+            </div>
+          </article>
+        `)
+        .join("");
+    }
 
-    setTimeout(() => {
-      fill.style.width = `${(data.confidence * 100).toFixed(1)}%`;
-    }, 50);
+    async function analyzeSentiment() {
+      const text = textInput.value.trim();
+      clearError();
 
-    res.style.display = "block";
-  }
+      if (text.length < 3) {
+        showError("El texto debe tener al menos 3 caracteres.");
+        return;
+      }
 
-  function showError(msg) {
-    const e = document.getElementById("error");
-    e.textContent = "⚠️ " + msg;
-    e.style.display = "block";
-  }
-</script>
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = "Analizando...";
 
+      try {
+        const prediction = await requestJson(`${API_BASE}/predict`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+
+        showResult(prediction);
+        const [metrics, history] = await Promise.all([
+          requestJson(`${API_BASE}/metrics`),
+          requestJson(`${API_BASE}/history?limit=5`),
+        ]);
+        paintMetrics(metrics);
+        paintHistory(history.items);
+      } catch (error) {
+        showError(error.message);
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = "Analizar sentimiento";
+      }
+    }
+
+    function showResult(prediction) {
+      resultBox.classList.add("show");
+      resultBadge.className = `badge ${prediction.sentiment}`;
+      resultBadge.textContent = prediction.sentiment;
+      resultSummary.textContent =
+        `Confianza estimada: ${(prediction.confidence * 100).toFixed(1)}% | Version ${prediction.app_version}`;
+      confidenceFill.style.width = `${(prediction.confidence * 100).toFixed(1)}%`;
+    }
+
+    function showError(message) {
+      errorBox.className = "feedback error";
+      errorBox.textContent = message;
+    }
+
+    function clearError() {
+      errorBox.className = "feedback";
+      errorBox.textContent = "";
+    }
+
+    function formatMetric(value) {
+      return Number(value).toFixed(4);
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    hydrateDashboard();
+  </script>
 </body>
 </html>

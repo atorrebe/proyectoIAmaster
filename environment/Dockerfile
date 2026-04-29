@@ -1,7 +1,12 @@
-Imagen Docker para contenerizar la API (uso opcional).
-FROM python:3.10-slim WORKDIR /app
-COPY environment/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt COPY . .
+FROM python:3.10-slim
+
+WORKDIR /app
+
+COPY environment/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
 EXPOSE 8000
 
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "src/main.py"]

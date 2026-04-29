@@ -1,14 +1,15 @@
 version: "3.9"
 
-services: api:
-build:
-context: .
-dockerfile: environment/Dockerfile ports:
-- "8000:8000"
-volumes:
-./models:/app/models
-
-./data:/app/data environment:
-PYTHONUNBUFFERED=1
-command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
-  
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: environment/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../models:/app/models
+      - ../data:/app/data
+    environment:
+      ALLOW_HOSTS: "127.0.0.1,localhost"
+      ALLOW_ORIGINS: "http://127.0.0.1:8000,http://localhost:8000"
